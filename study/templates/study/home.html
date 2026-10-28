@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teach Me</title>
+</head>
+<body>
+    <main>
+        <h1>Teach Me</h1>
+
+        <p>Режим: {{ mode }}</p>
+
+        {% if mode == "DEMO" %}
+            <p>DEMO · фиксированные карточки для готового примера</p>
+        {% elif mode == "LIVE" %}
+            <p>LIVE · генерация через Gemini API</p>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <div>
+                {{ form.title.label_tag }}
+                {{ form.title }}
+                {{ form.title.errors }}
+            </div>
+
+            <div>
+                {{ form.text.label_tag }}
+                {{ form.text }}
+                {{ form.text.errors }}
+            </div>
+
+            <button type="submit">Создать карточки</button>
+        </form>
+
+        <section>
+            <h2>Сохранённые конспекты</h2>
+
+            {% if sources %}
+                <ul>
+                    {% for source in sources %}
+                        <li>
+                            <a href="{% url 'source_detail' pk=source.pk %}">
+                                {{ source.title }}
+                            </a>
+                            <span> · {{ source.generation_mode|upper }}</span>
+                            <span> · Карточек: {{ source.cards.count }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Пока нет сохранённых конспектов.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ source.title }} — Teach Me</title>
+</head>
+<body>
+    <main>
+        <p><a href="{% url 'home' %}">← Назад к конспектам</a></p>
+
+        <h1>{{ source.title }}</h1>
+
+        <p>Режим генерации: {{ source.generation_mode|upper }}</p>
+        <p>Создано: {{ source.created_at|date:"d.m.Y H:i" }}</p>
+
+        <h2>Исходный конспект</h2>
+        <p>{{ source.text|linebreaksbr }}</p>
+
+        <h2>Учебные карточки</h2>
+        <p>Всего карточек: {{ cards|length }}</p>
+
+        {% for card in cards %}
+            <article>
+                <h3>Карточка {{ forloop.counter }}</h3>
+
+                <p><strong>Вопрос:</strong> {{ card.question }}</p>
+
+                <details>
+                    <summary>Показать ответ</summary>
+
+                    <p><strong>Ответ:</strong> {{ card.answer|linebreaksbr }}</p>
+
+                    <p>
+                        <strong>Цитата из конспекта:</strong>
+                        {{ card.source_quote|linebreaksbr }}
+                    </p>
+                </details>
+            </article>
+            <hr>
+        {% empty %}
+            <p>Для этого конспекта пока нет карточек.</p>
+        {% endfor %}
+    </main>
+</body>
+</html>
