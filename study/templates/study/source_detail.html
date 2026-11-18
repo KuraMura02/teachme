@@ -2,9 +2,11 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ source.title }} — Teach Me</title>
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
 </head>
 <body>
     <main>
@@ -16,32 +18,111 @@
         <p>Создано: {{ source.created_at|date:"d.m.Y H:i" }}</p>
 
         <h2>Исходный конспект</h2>
-        <p>{{ source.text|linebreaksbr }}</p>
+
+        <details>
+            <summary>Показать исходный конспект</summary>
+            <p>{{ source.text|linebreaksbr }}</p>
+        </details>
 
         <h2>Учебные карточки</h2>
-        <p>Всего карточек: {{ cards|length }}</p>
 
-        {% for card in cards %}
-            <article>
-                <h3>Карточка {{ forloop.counter }}</h3>
+        <p>Проверено {{ verified_count }} из {{ total_count }}</p>
+        <p>Осталось {{ pending_count }}</p>
 
-                <p><strong>Вопрос:</strong> {{ card.question }}</p>
+        <nav>
+            <a
+                href="?status=all"
+                {% if status == "all" %}aria-current="page"{% endif %}
+            >
+                Все ({{ total_count }})
+            </a>
+            |
+            <a
+                href="?status=pending"
+                {% if status == "pending" %}aria-current="page"{% endif %}
+            >
+                Нужно проверить ({{ pending_count }})
+            </a>
+            |
+            <a
+                href="?status=verified"
+                {% if status == "verified" %}aria-current="page"{% endif %}
+            >
+                Проверенные ({{ verified_count }})
+            </a>
+        </nav>
 
-                <details>
-                    <summary>Показать ответ</summary>
-
-                    <p><strong>Ответ:</strong> {{ card.answer|linebreaksbr }}</p>
+        {% if total_count == 0 %}
+            <p>В этом наборе пока нет учебных карточек.</p>
+            <p>
+                Исходный конспект сохранён выше.
+                Вы можете использовать его для создания новых карточек.
+            </p>
+        {% else %}
+            {% for card in cards %}
+                <article>
+                    <h3>Карточка {{ forloop.counter }}</h3>
 
                     <p>
-                        <strong>Цитата из конспекта:</strong>
-                        {{ card.source_quote|linebreaksbr }}
+                        <strong>Вопрос:</strong>
+                        {{ card.question }}
                     </p>
-                </details>
-            </article>
-            <hr>
-        {% empty %}
-            <p>Для этого конспекта пока нет карточек.</p>
-        {% endfor %}
+
+                    <p>
+                        <strong>Статус:</strong>
+                        {% if card.is_verified %}
+                            Проверено
+                        {% else %}
+                            Нужно проверить
+                        {% endif %}
+                    </p>
+
+                    <details>
+                        <summary>Показать ответ</summary>
+
+                        <p>
+                            <strong>Ответ:</strong>
+                            {{ card.answer|linebreaksbr }}
+                        </p>
+
+                        <p>
+                            <strong>Цитата из конспекта:</strong>
+                            {{ card.source_quote|linebreaksbr }}
+                        </p>
+                    </details>
+
+                    <form method="post" action="{% url 'card_review' card.pk %}">
+                        {% csrf_token %}
+
+                        {% if card.is_verified %}
+                            <button type="submit" name="action" value="reset">
+                                Вернуть на проверку
+                            </button>
+                        {% else %}
+                            <button type="submit" name="action" value="verify">
+                                Я проверил карточку
+                            </button>
+                        {% endif %}
+                    </form>
+
+                    <p>
+                        <a href="{% url 'card_edit' card.pk %}">
+                            Редактировать
+                        </a>
+                        |
+                        <a href="{% url 'card_delete' card.pk %}">
+                            Удалить
+                        </a>
+                    </p>
+                </article>
+                <hr>
+            {% empty %}
+                <p>В этом фильтре пока нет карточек.</p>
+                <p>
+                    <a href="?status=all">Показать все</a>
+                </p>
+            {% endfor %}
+        {% endif %}
     </main>
 </body>
 </html>

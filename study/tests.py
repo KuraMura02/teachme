@@ -20,8 +20,12 @@ class TeachMeTests(TestCase):
         }
 
     def post_valid_demo(self):
-        with patch("study.views.generate_cards", return_value=DEMO_CARDS) as provider:
+        with patch(
+            "study.views.generate_cards",
+            return_value=DEMO_CARDS,
+        ) as provider:
             response = self.client.post(self.home_url, self.valid_data)
+
         return response, provider
 
     def test_valid_demo_post_saves_source_and_three_cards(self):
@@ -35,10 +39,17 @@ class TeachMeTests(TestCase):
         source = Source.objects.get()
         self.assertEqual(source.title, self.valid_data["title"])
         self.assertEqual(source.text, DEMO_TEXT)
+
         self.assertEqual(
-            list(source.cards.order_by("position").values_list("position", flat=True)),
+            list(
+                source.cards.order_by("position").values_list(
+                    "position",
+                    flat=True,
+                )
+            ),
             [1, 2, 3],
         )
+
         self.assertRedirects(
             response,
             reverse("source_detail", kwargs={"pk": source.pk}),
@@ -60,7 +71,6 @@ class TeachMeTests(TestCase):
         self.assertTrue(response.context["form"].is_bound)
         self.assertTrue(response.context["form"].errors)
 
-    
     def test_invalid_quote_rejects_entire_provider_result(self):
         from .services import validate_cards
 
@@ -68,18 +78,25 @@ class TeachMeTests(TestCase):
         invalid_cards[0]["source_quote"] = "Этой цитаты нет в конспекте"
 
         with self.assertRaises(GenerationError):
-            validate_cards({"cards": invalid_cards}, DEMO_TEXT)
+            validate_cards(
+                {"cards": invalid_cards},
+                DEMO_TEXT,
+            )
 
         self.assertEqual(Source.objects.count(), 0)
         self.assertEqual(Flashcard.objects.count(), 0)
 
-
     def test_generation_error_returns_bound_form_without_saving(self):
         with patch(
             "study.views.generate_cards",
-            side_effect=GenerationError("Не удалось создать карточки."),
+            side_effect=GenerationError(
+                "Не удалось создать карточки."
+            ),
         ) as provider:
-            response = self.client.post(self.home_url, self.valid_data)
+            response = self.client.post(
+                self.home_url,
+                self.valid_data,
+            )
 
         self.assertEqual(response.status_code, 200)
         provider.assert_called_once_with(DEMO_TEXT)
@@ -93,8 +110,12 @@ class TeachMeTests(TestCase):
 
         def create_with_failure_on_second_card(**kwargs):
             calls["count"] += 1
+
             if calls["count"] == 2:
-                raise DatabaseError("Имитированная ошибка сохранения")
+                raise DatabaseError(
+                    "Имитированная ошибка сохранения"
+                )
+
             return original_create(**kwargs)
 
         with patch(
@@ -104,7 +125,10 @@ class TeachMeTests(TestCase):
             "study.views.Flashcard.objects.create",
             side_effect=create_with_failure_on_second_card,
         ):
-            response = self.client.post(self.home_url, self.valid_data)
+            response = self.client.post(
+                self.home_url,
+                self.valid_data,
+            )
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].is_bound)
@@ -116,8 +140,13 @@ class TeachMeTests(TestCase):
         source = Source.objects.create(
             title="Сохранённый конспект",
             text=DEMO_TEXT,
-            generation_mode=getattr(settings, "TEACHME_MODE", "demo"),
+            generation_mode=getattr(
+                settings,
+                "TEACHME_MODE",
+                "demo",
+            ),
         )
+
         for position, card in enumerate(DEMO_CARDS, start=1):
             Flashcard.objects.create(
                 source=source,
@@ -127,7 +156,11 @@ class TeachMeTests(TestCase):
                 source_quote=card["source_quote"],
             )
 
-        detail_url = reverse("source_detail", kwargs={"pk": source.pk})
+        detail_url = reverse(
+            "source_detail",
+            kwargs={"pk": source.pk},
+        )
+
         before_sources = Source.objects.count()
         before_cards = Flashcard.objects.count()
 
@@ -137,8 +170,11 @@ class TeachMeTests(TestCase):
 
         self.assertEqual(first_response.status_code, 200)
         self.assertEqual(second_response.status_code, 200)
+
         provider.assert_not_called()
+
         self.assertEqual(Source.objects.count(), before_sources)
         self.assertEqual(Flashcard.objects.count(), before_cards)
+
         self.assertContains(first_response, "Показать ответ")
         self.assertContains(second_response, "Показать ответ")

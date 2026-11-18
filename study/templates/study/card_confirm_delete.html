@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Удаление карточки — Teach Me</title>
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
+</head>
+<body>
+    <main>
+        <p>
+            <a href="{% url 'source_detail' source.pk %}">
+                ← Назад к карточкам
+            </a>
+        </p>
+
+        <h1>Удаление карточки</h1>
+
+        <p>Вы действительно хотите удалить эту карточку?</p>
+
+        <article>
+            <p>
+                <strong>Вопрос:</strong>
+                {{ card.question }}
+            </p>
+
+            <p>
+                <strong>Ответ:</strong>
+                {{ card.answer|linebreaksbr }}
+            </p>
+        </article>
+
+        <p>
+            <strong>Внимание:</strong>
+            карточка будет удалена без возможности восстановления.
+            Остальные карточки и исходный конспект останутся без изменений.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Да, удалить</button>
+
+            <a href="{% url 'source_detail' source.pk %}">
+                Отмена
+            </a>
+        </form>
+    </main>
+</body>
+</html>

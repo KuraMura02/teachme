@@ -1,0 +1,80 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактирование карточки — Teach Me</title>
+    <link rel="stylesheet" href="{% static 'study/style.css' %}">
+</head>
+<body>
+    <main>
+        <p>
+            <a href="{% url 'source_detail' source.pk %}">
+                ← Назад к карточкам
+            </a>
+        </p>
+
+        <h1>Редактирование карточки</h1>
+
+        <h2>Исходный конспект</h2>
+
+        <details>
+            <summary>Показать исходный конспект для сверки</summary>
+            <p>{{ source.text|linebreaksbr }}</p>
+        </details>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div>
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <p>
+                <label for="{{ form.question.id_for_label }}">
+                    {{ form.question.label }}
+                </label>
+                {{ form.question }}
+
+                {% for error in form.question.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </p>
+
+            <p>
+                <label for="{{ form.answer.id_for_label }}">
+                    {{ form.answer.label }}
+                </label>
+                {{ form.answer }}
+
+                {% for error in form.answer.errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </p>
+
+            <p>
+                <label for="{{ form.source_quote.id_for_label }}">
+                    {{ form.source_quote.label }}
+                </label>
+                {{ form.source_quote }}
+
+                {% for error in form.source_quote.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </p>
+
+            <button type="submit">Сохранить изменения</button>
+
+            <a href="{% url 'source_detail' source.pk %}">
+                Отмена
+            </a>
+        </form>
+    </main>
+</body>
+</html>
