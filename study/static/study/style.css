@@ -275,6 +275,31 @@ details p {
 }
 /* Responsive layout */
 
+
+/* Фильтры карточек */
+nav a {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    color: var(--primary-hover);
+    text-decoration: none;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* Наведение мыши */
+nav a:hover {
+    background-color: var(--primary-light);
+}
+
+/* Активная вкладка */
+nav a[aria-current="page"] {
+    background-color: var(--primary-hover);
+    color: var(--primary-light);
+    font-weight: bold;
+}
+
+
 @media (max-width: 600px) {
     body {
         padding: 22px 14px;
